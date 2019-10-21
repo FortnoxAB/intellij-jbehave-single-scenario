@@ -4,10 +4,11 @@ import com.google.common.base.CaseFormat;
 import com.intellij.compiler.options.CompileStepBeforeRun;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.RunManager;
+import com.intellij.execution.RunnerAndConfigurationSettings;
+import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.executors.DefaultDebugExecutor;
-import com.intellij.execution.impl.RunManagerImpl;
-import com.intellij.execution.impl.RunnerAndConfigurationSettingsImpl;
 import com.intellij.execution.junit.JUnitConfiguration;
+import com.intellij.execution.junit.JUnitConfigurationType;
 import com.intellij.execution.runners.ExecutionEnvironmentBuilder;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -53,34 +54,32 @@ public class JbehaveSingleScenarioAction extends AnAction implements FileEditorP
 		}
 		PsiClass mainClass = getStoryClass(project, storyFile);
 
-		JUnitConfiguration configuration = createJunitConfiguration(project, storyFile, scenario, mainClass);
-		addRunnerConfiguration(project, configuration);
+		RunManager runManager = RunManager.getInstance(project);
+		RunnerAndConfigurationSettings configuration = createConfiguration(storyFile, scenario, mainClass, runManager);
+		runManager.addConfiguration(configuration, false);
 
-		executeJunit(project, configuration);
+		executeJunit(project, configuration.getConfiguration());
 	}
 
-	private void executeJunit(Project project, JUnitConfiguration configuration) {
+
+	private void executeJunit(Project project, RunProfile runProfile) {
 		try {
-			ExecutionEnvironmentBuilder.create(project, DefaultDebugExecutor.getDebugExecutorInstance(), configuration).buildAndExecute();
+			ExecutionEnvironmentBuilder.create(project, DefaultDebugExecutor.getDebugExecutorInstance(), runProfile).buildAndExecute();
 		} catch (ExecutionException ex) {
 			Messages.showMessageDialog(project, "Failed debugging scenario: "+ex.getMessage()
 					, getTemplatePresentation().getText(), Messages.getInformationIcon());
 		}
 	}
 
-	private void addRunnerConfiguration(Project project, JUnitConfiguration configuration) {
-		RunManager runManager = RunManager.getInstance(project);
-		RunnerAndConfigurationSettingsImpl runnerAndConfigurationSettings = new RunnerAndConfigurationSettingsImpl((RunManagerImpl) runManager, configuration);
-		runManager.addConfiguration(runnerAndConfigurationSettings, false);
-	}
-
-	@NotNull
-	private JUnitConfiguration createJunitConfiguration(Project project, VirtualFile storyFile, String scenario, PsiClass mainClass) {
-		JUnitConfiguration configuration = new JUnitConfiguration(storyFile.getPresentableName()+":"+scenario, project);
-		configuration.setMainClass(mainClass);
+	private RunnerAndConfigurationSettings createConfiguration(VirtualFile storyFile, String scenario, PsiClass mainClass, RunManager runManager) {
+		String name = storyFile.getPresentableName()+":"+scenario;
+		RunnerAndConfigurationSettings configuration = runManager.createConfiguration(name, JUnitConfigurationType.class);
+		JUnitConfiguration jUnitConfiguration = (JUnitConfiguration) configuration.getConfiguration();
+		jUnitConfiguration.setMainClass(mainClass);
 		String filter = scenarioToFilter(scenario);
-		configuration.setVMParameters("-DmetaFilters=\"+scenario_title "+ filter +"\"");
-		configuration.setBeforeRunTasks(asList(new CompileStepBeforeRun.MakeBeforeRunTask()));
+		String vmParams = " -DmetaFilters=\"+scenario_title " + filter + "\"";
+		jUnitConfiguration.setVMParameters(jUnitConfiguration.getVMParameters() + vmParams);
+		jUnitConfiguration.setBeforeRunTasks(asList(new CompileStepBeforeRun.MakeBeforeRunTask()));
 		return configuration;
 	}
 

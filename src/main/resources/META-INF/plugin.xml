@@ -15,8 +15,7 @@
         </group>
     </actions>
 
-    <depends optional="false">JUnit</depends>
-    
+    <depends>JUnit</depends>
     
     <idea-version since-build="181"/>
 </idea-plugin>
