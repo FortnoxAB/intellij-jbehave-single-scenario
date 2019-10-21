@@ -79,7 +79,7 @@ public class JbehaveSingleScenarioAction extends AnAction implements FileEditorP
 		JUnitConfiguration configuration = new JUnitConfiguration(storyFile.getPresentableName()+":"+scenario, project);
 		configuration.setMainClass(mainClass);
 		String filter = scenarioToFilter(scenario);
-		configuration.setVMParameters("-DmetaFilters=\"+scenario_title "+ filter +"\"");
+		configuration.setVMParameters(configuration.getVMParameters() + " -DmetaFilters=\"+scenario_title "+ filter +"\"");
 		configuration.setBeforeRunTasks(asList(new CompileStepBeforeRun.MakeBeforeRunTask()));
 		return configuration;
 	}
