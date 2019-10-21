@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>se.fortnox.jbehavesinglescenario.jbehavesinglescenario</id>
+    <name>Jbehave debug single scenario</name>
+    <vendor email="jonas.hall@fortnox.se" url="http://www.fortnox.se">Fortnox</vendor>
+
+    <description>Right click in a scenario of a .story file to debug a single scenario</description>
+
+    <extensions defaultExtensionNs="com.intellij">
+    </extensions>
+
+    <actions>
+        <group id="JbehaveSingleScenarioGroup" text="Debug this scenario" description="Debug single scenario">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <action id="JbehaveSingleScenarioAction" class="se.fortnox.intellij.jbehave.JbehaveSingleScenarioAction" text="Debug this scenario" description="Debug single scenario"/>
+        </group>
+    </actions>
+
+    <depends optional="false">JUnit</depends>
+    
+    
+    <idea-version since-build="181"/>
+</idea-plugin>
