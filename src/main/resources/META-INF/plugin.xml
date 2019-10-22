@@ -16,6 +16,7 @@
     </actions>
 
     <depends>JUnit</depends>
+    <depends>com.intellij.modules.java</depends>
     
-    <idea-version since-build="181"/>
+    <idea-version since-build="183"/>
 </idea-plugin>
