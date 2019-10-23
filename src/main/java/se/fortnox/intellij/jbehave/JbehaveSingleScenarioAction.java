@@ -57,6 +57,7 @@ public class JbehaveSingleScenarioAction extends AnAction implements FileEditorP
 		RunManager runManager = RunManager.getInstance(project);
 		RunnerAndConfigurationSettings configuration = createConfiguration(storyFile, scenario, mainClass, runManager);
 		runManager.addConfiguration(configuration, false);
+		runManager.setSelectedConfiguration(configuration);
 
 		executeJunit(project, configuration.getConfiguration());
 	}
@@ -77,8 +78,11 @@ public class JbehaveSingleScenarioAction extends AnAction implements FileEditorP
 		JUnitConfiguration jUnitConfiguration = (JUnitConfiguration) configuration.getConfiguration();
 		jUnitConfiguration.setMainClass(mainClass);
 		String filter = scenarioToFilter(scenario);
-		String vmParams = " -DmetaFilters=\"+scenario_title " + filter + "\"";
-		jUnitConfiguration.setVMParameters(jUnitConfiguration.getVMParameters() + vmParams);
+		String vmParams = "-DmetaFilters=\"+scenario_title " + filter + "\"";
+		if (jUnitConfiguration.getVMParameters() != null) {
+			vmParams = jUnitConfiguration.getVMParameters() + " " + vmParams;
+		}
+		jUnitConfiguration.setVMParameters(vmParams);
 		jUnitConfiguration.setBeforeRunTasks(asList(new CompileStepBeforeRun.MakeBeforeRunTask()));
 		return configuration;
 	}
@@ -126,7 +130,7 @@ public class JbehaveSingleScenarioAction extends AnAction implements FileEditorP
 	}
 
 	private String scenarioToFilter(String scenario) {
-		return scenario.replaceAll("[åäöÅÄÖ\\-()]+", "*");
+		return scenario.replaceAll("[åäöÅÄÖ\\-()%]+", "*");
 	}
 
 	private String getStoryClassFile(VirtualFile file) {

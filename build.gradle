@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'se.fortnox.jbehavesinglescenario'
-version '2.3-SNAPSHOT'
+version '2.4-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
@@ -32,5 +32,21 @@ intellij {
 }
 
 patchPluginXml {
-    changeNotes """Changed supported versions, added support for templates."""
+    changeNotes """
+        <p>2.3:</p>
+        <ul>
+            <li>Allowing % in scenario title</li>
+            <li>Set the run configuration as selected</li>
+            <li>Fixed bug with template having null vm args value</li>
+        </ul>
+        <p>2.2:</p>
+        <ul>
+            <li>Changed supported versions.</li>
+        </ul>
+        <p>2.1:</p>
+        <ul>
+            <li>Changed supported versions.</li>
+            <li>Added support for templates.</li>
+        </ul>
+        """
 }
