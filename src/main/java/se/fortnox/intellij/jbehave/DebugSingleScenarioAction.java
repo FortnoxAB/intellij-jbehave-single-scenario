@@ -7,7 +7,7 @@ import com.intellij.icons.AllIcons;
 public class DebugSingleScenarioAction extends JbehaveSingleScenarioAction {
 
 	public DebugSingleScenarioAction() {
-		super("Debug this scenario", "Debug single scenario", AllIcons.Actions.StartDebugger);
+		super("Debug This Scenario", "Debug single scenario", AllIcons.Actions.StartDebugger);
 	}
 
 	@Override
