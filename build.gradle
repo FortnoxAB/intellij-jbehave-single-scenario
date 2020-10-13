@@ -33,6 +33,11 @@ intellij {
 
 patchPluginXml {
     changeNotes """
+        <p>2.4:</p>
+        <ul>
+            <li>Add support for running scenarios without debugger as well</li>
+            <li>Added icons to menu</li>
+        </ul>
         <p>2.3:</p>
         <ul>
             <li>Allowing % in scenario title</li>

@@ -3,10 +3,10 @@ package se.fortnox.intellij.jbehave;
 import com.google.common.base.CaseFormat;
 import com.intellij.compiler.options.CompileStepBeforeRun;
 import com.intellij.execution.ExecutionException;
+import com.intellij.execution.Executor;
 import com.intellij.execution.RunManager;
 import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.execution.configurations.RunProfile;
-import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.junit.JUnitConfiguration;
 import com.intellij.execution.junit.JUnitConfigurationType;
 import com.intellij.execution.runners.ExecutionEnvironmentBuilder;
@@ -30,54 +30,63 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import javax.swing.*;
 
 import static java.util.Arrays.asList;
 
-public class JbehaveSingleScenarioAction extends AnAction implements FileEditorProvider {
+public abstract class JbehaveSingleScenarioAction extends AnAction implements FileEditorProvider {
 
 	private static final String SCENARIO_PREFIX = "Scenario:";
 
 	public JbehaveSingleScenarioAction() {
-		super("Debug this scenario");
+		super();
+	}
+
+	public JbehaveSingleScenarioAction(@Nullable String text, @Nullable String description, @Nullable Icon icon) {
+		super(text, description, icon);
 	}
 
 	public void actionPerformed(AnActionEvent e) {
-
-		Project project = e.getProject();
+		Project     project   = e.getProject();
 		VirtualFile storyFile = getStoryFile(project);
 		if (storyFile == null) {
 			return;
 		}
+
 		String scenario = getScenarioName(e);
 		if (scenario == null) {
 			return;
 		}
+
 		PsiClass mainClass = getStoryClass(project, storyFile);
 
-		RunManager runManager = RunManager.getInstance(project);
+		RunManager                     runManager    = RunManager.getInstance(project);
 		RunnerAndConfigurationSettings configuration = createConfiguration(storyFile, scenario, mainClass, runManager);
 		runManager.addConfiguration(configuration, false);
 		runManager.setSelectedConfiguration(configuration);
 
-		executeJunit(project, configuration.getConfiguration());
+		executeJUnit(project, configuration.getConfiguration());
 	}
 
+	protected abstract Executor getExecutorInstance();
 
-	private void executeJunit(Project project, RunProfile runProfile) {
+	private void executeJUnit(Project project, RunProfile runProfile) {
 		try {
-			ExecutionEnvironmentBuilder.create(project, DefaultDebugExecutor.getDebugExecutorInstance(), runProfile).buildAndExecute();
+			ExecutionEnvironmentBuilder.create(project, getExecutorInstance(), runProfile).buildAndExecute();
 		} catch (ExecutionException ex) {
-			Messages.showMessageDialog(project, "Failed debugging scenario: "+ex.getMessage()
-					, getTemplatePresentation().getText(), Messages.getInformationIcon());
+			Messages.showMessageDialog(project, "Failed debugging scenario: " + ex.getMessage(),
+				getTemplatePresentation().getText(), Messages.getInformationIcon());
 		}
 	}
 
 	private RunnerAndConfigurationSettings createConfiguration(VirtualFile storyFile, String scenario, PsiClass mainClass, RunManager runManager) {
-		String name = storyFile.getPresentableName()+":"+scenario;
-		RunnerAndConfigurationSettings configuration = runManager.createConfiguration(name, JUnitConfigurationType.class);
-		JUnitConfiguration jUnitConfiguration = (JUnitConfiguration) configuration.getConfiguration();
+		String                         name               = storyFile.getPresentableName() + ":" + scenario;
+		RunnerAndConfigurationSettings configuration      = runManager.createConfiguration(name, JUnitConfigurationType.class);
+		JUnitConfiguration             jUnitConfiguration = (JUnitConfiguration)configuration.getConfiguration();
 		jUnitConfiguration.setMainClass(mainClass);
-		String filter = scenarioToFilter(scenario);
+		String filter   = scenarioToFilter(scenario);
 		String vmParams = "-DmetaFilters=\"+scenario_title " + filter + "\"";
 		if (jUnitConfiguration.getVMParameters() != null) {
 			vmParams = jUnitConfiguration.getVMParameters() + " " + vmParams;
@@ -88,10 +97,10 @@ public class JbehaveSingleScenarioAction extends AnAction implements FileEditorP
 	}
 
 	private PsiClass getStoryClass(Project project, VirtualFile storyFile) {
-		PsiManager psiManager = PsiManager.getInstance(project);
+		PsiManager  psiManager     = PsiManager.getInstance(project);
 		VirtualFile storyClassFile = LocalFileSystem.getInstance().findFileByPath(getStoryClassFile(storyFile));
-		PsiFile psiFile = psiManager.findFile(storyClassFile);
-		PsiJavaFile javaFile = (PsiJavaFile) psiFile;
+		PsiFile     psiFile        = psiManager.findFile(storyClassFile);
+		PsiJavaFile javaFile       = (PsiJavaFile)psiFile;
 
 		PsiClass[] classes = javaFile.getClasses();
 		return classes[0];
@@ -99,7 +108,7 @@ public class JbehaveSingleScenarioAction extends AnAction implements FileEditorP
 
 	private VirtualFile getStoryFile(Project project) {
 		FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
-		VirtualFile[] selectedFiles = fileEditorManager.getSelectedFiles();
+		VirtualFile[]     selectedFiles     = fileEditorManager.getSelectedFiles();
 		if (selectedFiles.length == 0) {
 			return null;
 		}
@@ -135,7 +144,7 @@ public class JbehaveSingleScenarioAction extends AnAction implements FileEditorP
 
 	private String getStoryClassFile(VirtualFile file) {
 		String path = file.getParent().getPath();
-		path = path.replace("/src/test/resources","/src/test/java");
+		path = path.replace("/src/test/resources", "/src/test/java");
 		path = path + "/" + CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, file.getName().replace(".story", ".java"));
 		return path;
 	}
@@ -155,7 +164,7 @@ public class JbehaveSingleScenarioAction extends AnAction implements FileEditorP
 	@Override
 	public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
 		if (file.getExtension().equals("story")) {
-			DefaultActionGroup editorMenu = (DefaultActionGroup) ActionManager.getInstance().getAction("EditorPopupMenu");
+			DefaultActionGroup editorMenu = (DefaultActionGroup)ActionManager.getInstance().getAction("EditorPopupMenu");
 			editorMenu.add(this);
 		}
 		return false;

@@ -1,2 +1,2 @@
 # intellij-jbehave-single-scenario
-Intellij plugin for running a single jbehave scenario
+IntelliJ plugin for running a single JBehave scenario

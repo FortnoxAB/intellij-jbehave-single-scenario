@@ -1,22 +1,35 @@
 <idea-plugin>
-    <id>se.fortnox.jbehavesinglescenario.jbehavesinglescenario</id>
-    <name>Jbehave debug single scenario</name>
-    <vendor email="jonas.hall@fortnox.se" url="http://www.fortnox.se">Fortnox</vendor>
+	<id>se.fortnox.jbehavesinglescenario.jbehavesinglescenario</id>
+	<name>JBehave Debug Single Scenario</name>
+	<vendor email="jonas.hall@fortnox.se" url="http://www.fortnox.se">Fortnox</vendor>
 
-    <description>Right click in a scenario of a .story file to debug a single scenario</description>
+	<description>Right click in a scenario of a .story file to run or debug it.</description>
 
-    <extensions defaultExtensionNs="com.intellij">
-    </extensions>
+	<extensions defaultExtensionNs="com.intellij">
+	</extensions>
 
-    <actions>
-        <group id="JbehaveSingleScenarioGroup" text="Debug this scenario" description="Debug single scenario">
-            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-            <action id="JbehaveSingleScenarioAction" class="se.fortnox.intellij.jbehave.JbehaveSingleScenarioAction" text="Debug this scenario" description="Debug single scenario"/>
-        </group>
-    </actions>
+	<actions>
+		<group id="DebugSingleScenarioGroup" text="Debug This Scenario" description="Debug single scenario">
+			<add-to-group group-id="EditorPopupMenu" anchor="last" />
+			<action
+				id="RunSingleScenarioAction"
+				class="se.fortnox.intellij.jbehave.RunSingleScenarioAction"
+				text="Run This Scenario"
+				icon="AllIcons.Actions.Execute"
+				description="Run single scenario"
+			/>
+			<action
+				id="DebugSingleScenarioAction"
+				class="se.fortnox.intellij.jbehave.DebugSingleScenarioAction"
+				text="Debug This Scenario"
+				icon="AllIcons.Actions.StartDebugger"
+				description="Debug single scenario"
+			/>
+		</group>
+	</actions>
 
-    <depends>JUnit</depends>
-    <depends>com.intellij.modules.java</depends>
-    
-    <idea-version since-build="183"/>
+	<depends>JUnit</depends>
+	<depends>com.intellij.modules.java</depends>
+
+	<idea-version since-build="191" />
 </idea-plugin>
