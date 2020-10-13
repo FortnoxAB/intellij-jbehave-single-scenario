@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'se.fortnox.jbehavesinglescenario'
-version '2.4'
+version '2.4-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
