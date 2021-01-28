@@ -6,6 +6,10 @@
 	<description>Right click in a scenario of a .story file to run or debug it.</description>
 
 	<extensions defaultExtensionNs="com.intellij">
+		<runLineMarkerContributor
+				language="Story"
+				implementationClass="se.fortnox.intellij.jbehave.SingleScenarioRunLineMarkerProvider"
+		/>
 	</extensions>
 
 	<actions>
