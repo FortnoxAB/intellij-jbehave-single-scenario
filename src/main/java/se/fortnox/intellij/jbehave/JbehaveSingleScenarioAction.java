@@ -23,12 +23,9 @@ import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.PsiManager;
+import com.intellij.psi.*;
+import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,14 +35,21 @@ import static java.util.Arrays.asList;
 
 public abstract class JbehaveSingleScenarioAction extends AnAction implements FileEditorProvider {
 
-	private static final String SCENARIO_PREFIX = "Scenario:";
+	public static final String SCENARIO_PREFIX = "Scenario:";
 
-	public JbehaveSingleScenarioAction() {
-		super();
-	}
+	private final String      providedScenarioName;
+	private final VirtualFile providedStoryFile;
 
-	public JbehaveSingleScenarioAction(@Nullable String text, @Nullable String description, @Nullable Icon icon) {
+	public JbehaveSingleScenarioAction(
+		@NotNull String text,
+		@NotNull String description,
+		@NotNull Icon icon,
+		@Nullable String scenarioName,
+		@Nullable VirtualFile storyFile
+	) {
 		super(text, description, icon);
+		providedScenarioName = scenarioName;
+		providedStoryFile    = storyFile;
 	}
 
 	public void actionPerformed(AnActionEvent e) {
@@ -97,16 +101,26 @@ public abstract class JbehaveSingleScenarioAction extends AnAction implements Fi
 	}
 
 	private PsiClass getStoryClass(Project project, VirtualFile storyFile) {
-		PsiManager  psiManager     = PsiManager.getInstance(project);
-		VirtualFile storyClassFile = LocalFileSystem.getInstance().findFileByPath(getStoryClassFile(storyFile));
-		PsiFile     psiFile        = psiManager.findFile(storyClassFile);
-		PsiJavaFile javaFile       = (PsiJavaFile)psiFile;
+		String pkg = storyFile.getParent()
+			.getPath()
+			.substring(storyFile.getPath().indexOf("src/test/resources") + "src/test/resources".length())
+			.replace("/", ".")
+			.replaceAll("^\\.", "");
 
-		PsiClass[] classes = javaFile.getClasses();
-		return classes[0];
+		String className = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, storyFile.getName().replace(".story", ""));
+
+		String qualifiedName = pkg.isEmpty() ? className : (pkg + "." + className);
+
+		return JavaPsiFacade.getInstance(project).findClass(
+			qualifiedName,
+			GlobalSearchScope.projectScope(project));
 	}
 
 	private VirtualFile getStoryFile(Project project) {
+		if (providedStoryFile != null) {
+			return providedStoryFile;
+		}
+
 		FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
 		VirtualFile[]     selectedFiles     = fileEditorManager.getSelectedFiles();
 		if (selectedFiles.length == 0) {
@@ -119,6 +133,10 @@ public abstract class JbehaveSingleScenarioAction extends AnAction implements Fi
 	}
 
 	private String getScenarioName(AnActionEvent e) {
+		if (providedScenarioName != null) {
+			return providedScenarioName;
+		}
+
 		Editor editor = e.getData(CommonDataKeys.EDITOR);
 		if (editor == null) {
 			return null;
@@ -142,14 +160,7 @@ public abstract class JbehaveSingleScenarioAction extends AnAction implements Fi
 		return scenario.replaceAll("[åäöÅÄÖ\\-()%]+", "*");
 	}
 
-	private String getStoryClassFile(VirtualFile file) {
-		String path = file.getParent().getPath();
-		path = path.replace("/src/test/resources", "/src/test/java");
-		path = path + "/" + CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, file.getName().replace(".story", ".java"));
-		return path;
-	}
-
-	private String findScenario(String text, int start) {
+	public static String findScenario(String text, int start) {
 		int scenarioStart = text.lastIndexOf(SCENARIO_PREFIX, start);
 		if (scenarioStart == -1) {
 			return null;
@@ -207,5 +218,13 @@ public abstract class JbehaveSingleScenarioAction extends AnAction implements Fi
 	@Override
 	public FileEditorPolicy getPolicy() {
 		return null;
+	}
+
+	public static String formatTrimmedScenarioName(String scenario) {
+		if (scenario.length() > 80) {
+			return scenario.substring(0, 80) + " ...";
+		}
+
+		return scenario;
 	}
 }
