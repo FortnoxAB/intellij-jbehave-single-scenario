@@ -16,7 +16,7 @@ public class RunSingleScenarioAction extends JbehaveSingleScenarioAction {
 	}
 
 	public RunSingleScenarioAction(@NotNull String scenarioName, @NotNull VirtualFile storyFile) {
-		super("Run '" + formatTrimmedScenarioName(scenarioName) + "'",
+		super("Run '" + ScenarioUtils.formatTrimmedName(scenarioName) + "'",
 			"Run single scenario",
 			AllIcons.Actions.Execute,
 			scenarioName,

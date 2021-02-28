@@ -90,7 +90,7 @@ public abstract class JbehaveSingleScenarioAction extends AnAction implements Fi
 		RunnerAndConfigurationSettings configuration      = runManager.createConfiguration(name, JUnitConfigurationType.class);
 		JUnitConfiguration             jUnitConfiguration = (JUnitConfiguration)configuration.getConfiguration();
 		jUnitConfiguration.setMainClass(mainClass);
-		String filter   = scenarioToFilter(scenario);
+		String filter   = ScenarioUtils.scenarioFilterFromName(scenario);
 		String vmParams = "-DmetaFilters=\"+scenario_title " + filter + "\"";
 		if (jUnitConfiguration.getVMParameters() != null) {
 			vmParams = jUnitConfiguration.getVMParameters() + " " + vmParams;
@@ -156,10 +156,6 @@ public abstract class JbehaveSingleScenarioAction extends AnAction implements Fi
 		return findScenario(text, start);
 	}
 
-	private String scenarioToFilter(String scenario) {
-		return scenario.replaceAll("[åäöÅÄÖ\\-()%]+", "*");
-	}
-
 	public static String findScenario(String text, int start) {
 		int scenarioStart = text.lastIndexOf(SCENARIO_PREFIX, start);
 		if (scenarioStart == -1) {
@@ -218,13 +214,5 @@ public abstract class JbehaveSingleScenarioAction extends AnAction implements Fi
 	@Override
 	public FileEditorPolicy getPolicy() {
 		return null;
-	}
-
-	public static String formatTrimmedScenarioName(String scenario) {
-		if (scenario.length() > 80) {
-			return scenario.substring(0, 80) + " ...";
-		}
-
-		return scenario;
 	}
 }
