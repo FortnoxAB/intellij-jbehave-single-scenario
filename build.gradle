@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'se.fortnox.jbehavesinglescenario'
-version '2.5-SNAPSHOT'
+version '2.6-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
@@ -36,6 +36,10 @@ intellij {
 
 patchPluginXml {
     changeNotes """
+        <p>2.6:</p>
+        <ul>
+            <li>Restore support for non-ascii content in scenario titles</li>
+        </ul>
         <p>2.5:</p>
         <ul>
             <li>Run/Debug actions now show as line markers</li>
