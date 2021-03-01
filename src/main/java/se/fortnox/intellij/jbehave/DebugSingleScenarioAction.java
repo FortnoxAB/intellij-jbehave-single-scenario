@@ -17,7 +17,7 @@ public class DebugSingleScenarioAction extends JbehaveSingleScenarioAction {
 	}
 
 	public DebugSingleScenarioAction(@NotNull String scenarioName, @NotNull VirtualFile storyFile) {
-		super("Debug '" + formatTrimmedScenarioName(scenarioName) + "'",
+		super("Debug '" + ScenarioUtils.formatTrimmedName(scenarioName) + "'",
 			"Debug single scenario",
 			AllIcons.Actions.StartDebugger,
 			scenarioName,
